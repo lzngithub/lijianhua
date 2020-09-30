@@ -4,7 +4,10 @@ import {Button} from 'antd'
 import { HashRouter } from 'react-router-dom'
 import { renderRoutes } from "react-router-config"
 import routes from '@/routes'
+import http from '@/utils/http'
 import './index.less';
+
+React.$http = http;
 
 ReactDOM.render(
   <React.StrictMode>
