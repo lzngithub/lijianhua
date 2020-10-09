@@ -8,7 +8,18 @@ const Login = Loadable({
     loading() { return <Spin /> }
 })
 
+const Home = Loadable({
+    loader: () => import('@/views/Home'),
+    loading() { return <Spin /> }
+});
+
+const Layout = Loadable({
+    loader: () => import('@/views/Layout'),
+    loading() { return <Spin /> }
+});
 
 export default {
     Login,
+    Home,
+    Layout
   }
