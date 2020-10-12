@@ -18,29 +18,108 @@ import {
 
 import './index.scss'
 const { Header, Sider, Content } = Layout;
-const {Item, SubMenu} = Menu;
+const {Item, SubMenu, Divider} = Menu;
+
+const mapMenu = [
+    { key: 'home', name: '首页' },
+    { key: 'user', name: '用户列表', parentName: '用户管理', parentKey: 'user-menu' },
+    { key: 'roles', name: '角色管理', parentName: '用户管理', parentKey: 'user-menu' },
+    { key: 'articles', name: '文章列表', parentName: '文章管理', parentKey: 'article-menu' },
+    { key: 'category', name: '文章分类', parentName: '文章管理', parentKey: 'article-menu' },
+    { key: 'comments', name: '文章评论', parentName: '文章管理', parentKey: 'article-menu' },
+    { key: 'message', name: '消息中心', parentName: '社区管理', parentKey: 'community' },
+    { key: 'website-setting', name: '网站设置', parentName: '设置管理', parentKey: 'setting-menu' },
+    { key: 'email-service', name: '邮件服务', parentName: '设置管理', parentKey: 'setting-menu' },
+    { key: 'basic-info', name: '基本资料', parentName: '设置管理', parentKey: 'setting-menu' },
+    { key: 'modify-password', name: '修改密码', parentName: '设置管理', parentKey: 'setting-menu' },
+  ]
 
 class _Layout extends React.Component {
     constructor(props){
-        super();
+        super(props);
+        const currentPath = this.splitPath();
+        const userInfo = JSON.parse(sessionStorage.getItem('userInfo')) || {};
+        const openKeys = this.handleFindOpenMenu(currentPath);
         this.state = {
             title: '后台管理系统',
+            collapsed: false,
+            userInfo,
+            breadcrumb: openKeys.breadcrumb,
+            selectedKeys: [currentPath],
+            defaultOpenKeys: [openKeys.menuKey]
         }
         
     }
-
+    splitPath = () => {
+        console.log(this.props);
+        const { location } = this.props
+        console.log(location);
+        return location.pathname.substr(1)
+      }
+    toggle = () => {
+        this.setState({
+            collapsed: !this.state.collapsed,
+            title: this.state.collapsed ? '后台管理系统' : '',
+        });
+    }
+    handleFindOpenMenu = (selectedKeys) => {
+        const findMenu = mapMenu.find(subMenu => subMenu.key === selectedKeys)
+        let breadcrumb = []
+        breadcrumb.push(findMenu.parentName, findMenu.name)
+        console.log(breadcrumb);
+        breadcrumb = breadcrumb.filter(v => v)
+        return {
+          menuKey: findMenu && findMenu.parentKey,
+          subMenu: findMenu && findMenu.key,
+          breadcrumb
+        }
+    }
+    handleRouter = (item) => {
+        const { history } = this.props
+        console.log(item);
+        console.log(this.props);
+        const findMenu = mapMenu.find(subMenu => subMenu.key === item.key)
+        let breadcrumb = []
+        breadcrumb.push(findMenu.parentName, findMenu.name)
+        breadcrumb = breadcrumb.filter(v => v)
+        this.setState({
+          selectedKeys: [item.key],
+          breadcrumb
+        }, () => {
+          history.push(item.key)
+        })
+    }
     render() {
         const { route } = this.props;
-        const { title } = this.state;
+        const { collapsed,title, userInfo, breadcrumb, selectedKeys, defaultOpenKeys } = this.state;
+
+        const userDropdownMenu = (
+            <Menu>
+                <Item>
+                    基本资料
+                </Item>
+                <Item>
+                    修改密码
+                </Item>
+                <Divider />
+                <Item>
+                    退出
+                </Item>
+            </Menu>
+        )
+
         return (
             <BrowserRouter>
                 <Layout className="layout-container">
-                    <Sider>
+                    <Sider trigger={null} collapsible collapsed={collapsed}>
                         <div className="logo">
                             <CodepenCircleOutlined className="icon"></CodepenCircleOutlined>
                             <span>{title}</span>
                         </div>
-                        <Menu theme="dark" mode="inline" defaultSelectedKeys={['4']}>
+                        <Menu theme="dark" mode="inline"
+                            selectedKeys={selectedKeys}
+                            defaultOpenKeys={defaultOpenKeys}
+                            onClick={this.handleRouter}>
                             <Item key="home" icon={<HomeOutlined />}>
                                 首页
                             </Item>
@@ -89,10 +168,33 @@ class _Layout extends React.Component {
                             </Menu.SubMenu>
                         </Menu>
                     </Sider>
-                    <Layout>
-                        <Header>
-                            
+                    <Layout className="site-layout">
+                        <Header className="layout-header bg-white">
+                            {React.createElement(this.state.collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+                                className: "trigger",
+                                onClick: this.toggle,
+                            })}
+                            <div className="header-right">
+                                <div className="info mr-20">
+                                    <Avatar src={userInfo.avatar} />
+                                    <Dropdown overlay={userDropdownMenu}
+                                    trigger="['click']"
+                                    getPopupContainer={() => document.getElementsByClassName('info')[0]}>
+                                    <Button type="link" className='btn-user'>
+                                        {userInfo.username}<DownOutlined />
+                                    </Button>
+                                    </Dropdown>
+                                </div>
+                            </div>
                         </Header>
+                        <Content className='layout-content'>
+                            <Breadcrumb className='layout-nav'>
+                            {breadcrumb.map((item, index) => <Breadcrumb.Item key={index}>{item}</Breadcrumb.Item>)}
+                            </Breadcrumb>
+                            <div className='layout-content--info'>
+                            {renderRoutes(route.routes)}
+                            </div>
+                        </Content>
                     </Layout>
                 </Layout>
             </BrowserRouter>
