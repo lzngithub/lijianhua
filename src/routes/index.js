@@ -36,6 +36,13 @@ const routes = [
           // component: AsyncComponent(() => import('@/views/Home'))
           // component: Loadable({ loader: () => import('@/views/Home'), loading() { return <Spin /> }})
           component: RouteComponents.Home
+        },
+        {
+          path: '/user',
+          requiredAuth: true,
+          // component: AsyncComponent(() => import('@/views/Home'))
+          // component: Loadable({ loader: () => import('@/views/Home'), loading() { return <Spin /> }})
+          component: RouteComponents.User
         }
       ]
     }

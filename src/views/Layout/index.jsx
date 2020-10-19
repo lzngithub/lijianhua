@@ -88,9 +88,10 @@ class _Layout extends React.Component {
         }, () => {
           history.push(item.key)
         })
-    }
+      }
     render() {
         const { route } = this.props;
+        console.log(route);
         const { collapsed,title, userInfo, breadcrumb, selectedKeys, defaultOpenKeys } = this.state;
 
         const userDropdownMenu = (
